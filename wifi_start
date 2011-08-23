@@ -1,0 +1,43 @@
+#!/bin/bash
+
+. ~/.shell-colors
+function my_timer {
+    waiter="WAITING"
+    for ((i=0;i<j;++i)); do
+        printf "\r$blue   ::   $yell$waiter"
+        sleep 1
+        waiter="$waiter ."
+    done
+}
+
+if [ "`iwconfig wlan0 | grep -i quality`" = "" ]; then
+    echo -e "$yell Starting the WIFI connection"
+    echo -e "$blue   ::  $red Bringing down ethernet"$reset
+    #printf "$green\t password"
+    sudo ifconfig eth0 down
+    j="4";my_timer;printf "\n"
+
+    echo -e "$blue   ::  $green Bringing up WIFI"$reset
+    sudo ifconfig wlan0 up
+    sudo iwconfig wlan0 essid "prebble"
+    sudo ifconfig wlan0 10.0.0.36
+    sudo route add default gw 10.0.0.138
+    j="6";my_timer
+    printf "\n\n$cyan"
+    iwconfig wlan0 | grep -i access
+    iwconfig wlan0 | grep -i quality
+    echo -e "$blue   ::$green   DONE $reset"
+else
+    printf "$yell Restoring the Ethernet Connection \n"
+    echo -e "$blue   ::  $red Bringing down WIFI $reset"
+    sudo ifconfig wlan0 down
+    j="4";my_timer;printf "\n"
+
+    echo -e "$blue   ::  $green Bringing up ETHERNET $reset"
+    sudo ifconfig eth0 up
+    sudo route add default gw 10.0.0.138
+    j="6";my_timer; printf "\n"
+    echo -e "$blue   ::$green   DONE $reset"
+fi
+
+exit 0

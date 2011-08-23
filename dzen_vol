@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "50" | gdbar -w 50 -s '=' -min 0 -max 100 | dzen2 -p 4
+
+exit 0

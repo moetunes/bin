@@ -1,0 +1,18 @@
+#!/bin/bash
+#  Using ffmpeg to grab a video of the desktop
+#  Saves to out.avi in the current dir
+# for youtube sizes http://www.youtube.com/handbook_popup_produce_upload?pcont=bestformats
+
+. ~/.shell-colors
+if [ "$1" != "" ]; then
+	capture="$1"
+else
+	printf "\t$red Usage : $0 <seconds to capture> \n\n"
+	exit 1
+fi
+printf "\t$yell Recording \r"
+ffmpeg -t $capture -y -r 30 -g 300 -s 1366x768 -f x11grab -i :0.0 -vcodec mpeg4 -s 640x360 out.avi 2> /dev/null
+printf "\t$green Done Recording \r" && sleep 1
+printf "$blue Leaving\n$reset"
+
+exit 0

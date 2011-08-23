@@ -1,0 +1,14 @@
+#!/bin/bash
+
+. ~/.shell-colors
+
+echo -e "$yell   CHECKING THE WIFI CONNECTION AND SIGNAL STRENGTH \n$cyan"
+printf "\t  A" && iwconfig wlan0 | grep -i access | cut -d "A" -f2
+conn=`iwconfig wlan0 | grep -i quality`
+if [ "$conn" = "" ]; then
+    printf "\t\t$yell NOT$red CONNECTED! ! ! \n\n" 
+else
+    printf "$conn \n"
+fi
+printf "$reset \n\n"
+exit 0

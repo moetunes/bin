@@ -1,0 +1,173 @@
+#!/bin/bash
+## To calcuate bitrate :- (finished size MB x 1024 x 8 / ( time in sec ))  - audio bitrate
+
+# include some colours
+. ~/.shell-colors
+
+echo "                  ********"
+if [ -z "$1" ]; then 
+    printf "$green           dubb-ffmpeg - a 2-pass video encoder \n"
+    printf "$yell       *** usage: dubb-ffmpeg /path/to/movie.mpg *** \n"
+    printf "$yell             files saved in home directory \n"
+    exit
+fi
+printf "$green We are converting any video file to xvid cd sized avi as a default. \n"
+printf "$yell       All options are changeable \n"
+printf "$yell      The file info we need :- \n"
+printf "$white    [ The important lines start with   Stream ] \n"
+##access the working movie title ##
+movie_name=$1
+printf "\n $cyan      ******** \n"
+##this gives the various video/audio settings for the input file##
+ffmpeg -i $movie_name
+echo "       ********"
+##Defaults ##
+size="720x576"
+aspect="16:9"
+mp3rate="128"
+fps="25"
+start=""
+time=""
+bitrate="1100"
+
+###****************************************************
+##if we change a default we call the options again for more changes ##
+function change_more {
+if [ "$input" = "" ] ; then
+    move_on
+else
+    changing_defaults
+fi
+}
+###***************************************************
+##tell about defaults and take default to change ##
+function change_defaults {
+display_values;
+printf "$yell \n Values to be used are shown in $cyan [] $yell :- \n"
+printf " 1. MP3 bitrate $cyan [$mp3rate] $yell - it is set to stereo as well \n"
+printf " 2. Aspect ratio $cyan [$aspect] $yell - normally 4:3 or 16:9 \n"
+printf " 3. Frame size/resolution $cyan [$size] $yell - to work with the aspect ratio [$aspect] \n"
+printf " 4. Audio sync level $cyan [$fps] $yell - important to get the sound synced properly  \n"
+printf " 5. Start $cyan [$start] $yell - To cut the first xxx sec of the file. Blank to encode from start \n"
+printf " 6. Time $cyan [$time] $yell - Blank to record whole file - 00:00:00 format used for hour or min \n"
+printf " 7. Bitrate $cyan [$bitrate] $yell - Higher = better quality - lower = smaller file size \n"
+echo " To change a default type the corresponding number and hit enter"
+echo "  or hit enter to continue conversion"
+read input
+change_more
+}
+###***************************************************
+##change default values ##
+function changing_defaults {
+printf $green
+case $input in
+    1) echo "  Add New MP3 Bitrate - Common rates are 96, 128, 160, 192,256"
+         read newmp3
+         mp3rate=$newmp3
+         change_defaults ;;
+    2) echo "  Add new asdpect ratio - usually 16:9 or 4:3"
+         read newaspect
+         aspect=$newaspect
+         change_defaults ;;
+    3) echo "  Add new Resolution - sizes are best if divisble by 16"
+         read newsize
+         size=$newsize
+         change_defaults ;;
+    4) echo "  Add new Audio sync level - FPS/25 is fine"
+         read newfps
+         fps=$newfps
+         change_defaults ;;
+    5) echo "  Add -start encoding from time- in secs"
+    	read newstart
+    	start=$newstart
+    	change_defaults ;;
+    6) echo "  Add time required - for samples or testing"
+         read newtime
+         time=$newtime
+         change_defaults ;;
+    7) echo "  Add bitrate required - for quality or file size"
+         read newbitrate
+         bitrate=$newbitrate
+         change_defaults ;;
+    *) echo " Oops.. Must supply a correct option or just hit enter"
+         change_defaults ;;
+esac
+}
+###*******************************************************
+##self explanitory ##
+function display_values {
+    title="   Settings to be used or changed:"
+    values="   MP3Bit/R - $mp3rate , Asp/R - $aspect ,  , Res - $size , FPS - $fps, Bitrate - $bitrate"
+    printf "\n $purp $title "
+    printf " \n $red $values \n"
+}
+###*******************************************************
+##do the work converting the video/audio ##
+function move_on {
+display_values;
+printf "\n"
+##set the values used in ffmpeg ##
+setsize="-s $size"
+setaspect="-aspect $aspect"
+mp3rate=$(($mp3rate * 1000))
+setmp3rate="-ab $mp3rate"
+setfps="-async $fps"
+setbitrate=$(($bitrate*1000))
+if [ "$start" = "" ]; then
+    setstart=""
+else
+    setstart="-ss $start"
+fi
+if [ "$time" = "" ]; then
+    settime=""
+else
+    settime="-t $time"
+fi
+## Sort out the file name ##
+name=$(echo $movie_name | cut -d "." -f1 | tr - _)
+moving=`date +%b%d-%H%M`
+[ -f ~/$name.1.avi ] && mv -v ~/$name.1.avi ~/$moving$name.avi && \
+	printf "$cyan Lookit above ^^!! \n $reset" || \
+	printf "$cyan Nothimg to see here - move along... \n"
+name=$name.1.avi
+
+## set up the timing ##
+ starting_time=`date +%s`
+printf "$yell *** Working on :-  $name *** "
+printf "$yell \n *** Starting pass 1 *** \n"
+printf "$green \n \n"
+
+nice -n 8 ffmpeg -i $movie_name -y -pass 1 -threads 4 $setstart $settime $setsize $setaspect $setfps -f avi -vcodec mpeg4 -b $setbitrate -qmax 9 -dc 10 -bf 2 -g 250 -acodec copy /dev/null
+
+ middle_time=`date +%s`
+answer=$(($middle_time-$starting_time))
+
+[ "$answer" -ge "61" ] && \
+	minutes=$(($answer/60)) && seconds=$(($answer-($minutes*60))) && \
+	printf " \n $cyan  $minutes mins $seconds secs so far... \n" || \
+	printf "\n $cyan $answer secs so far... \n"
+
+printf "\n $yell *** Saving to :-  $name *** "
+printf "\n  *** Starting pass 2 ***\n $green \n"
+
+nice -n 8 ffmpeg -i $movie_name -pass 2 -threads 4 $setstart $settime $setsize $setaspect $setfps -f avi -vcodec mpeg4 -vtag XVID -b $setbitrate -qmax 9 -dc 10 -bf 2 -g 250 -acodec libmp3lame $setmp3rate -ac 2 -vol 512 ~/$name 
+
+ end_time=`date +%s`
+answer=$(($end_time-$starting_time))
+
+[ "$answer" -ge "60" ] && \
+	minutes=$(($answer/60)) && seconds=$(($answer-($minutes*60))) && \
+	printf "\n $cyan   $minutes mins $seconds secs overall... \n \n" || \
+	printf "\n $cyan $answer seconds overall... \n\n"
+
+printf "  $yell   *** Finished encoding now deleting temporary files *** \n"
+rm -v ffmpeg2pass-0.log
+printf "\n    *** Done - Bye ! *** \n\n"
+printf '\033[0m' # return the prompt to orig
+# set the cpu speed
+mhz
+exit 0
+}
+###************************************************
+##start the ball rolling ##
+change_defaults

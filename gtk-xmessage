@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# List the folders in ~/.themes on xmessage buttons
+# for easy selection and edit the ~/.gtkrc-2.0 file accordingly
+
+# find out the current theme
+current=`grep include ~/.gtkrc-2.0 | cut -d "/" -f5`
+a=1
+## set it up so there are the right num buttons and they have the right label
+## "Aspares" is a folder I made to store things I don't want to show up
+for f in `ls -I Aspares ~/.themes/`; do
+	[ "$a" = "1" ] && butlabel="$f:0" || \
+		butlabel="$butlabel,$f:0"
+	((a++))
+done
+
+this_theme=`xmessage -center -print -buttons $butlabel "The current theme is : $current   "`
+[ "$this_theme" != "" ] && sed -i "s/$current/$this_theme/" ~/.gtkrc-2.0
+newtheme=`grep include ~/.gtkrc-2.0 | cut -d "/" -f5`
+xmessage -timeout 2 -center "GTK Theme is now: $newtheme   "
+
+exit 0
