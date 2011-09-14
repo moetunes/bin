@@ -20,7 +20,7 @@ if [ -f "$1" ]; then
 	echo -e "\n   ***Saving to $name***\n $green"
 	starting_time=`date +%s`
 
-	nice -n 8 ffmpeg $convtime -i $1 -y -threads 3 -s 720x400 -aspect 16:9 -f avi -vcodec mpeg4 -b 1100000 -qmax 8 -async 25 -acodec libmp3lame -ab 96k -ac 2 -vol 512 $name
+	nice -n 8 ffmpeg $convtime -i $1 -y -threads 5 -s 720x400 -aspect 16:9 -f avi -vcodec mpeg4 -b 1100000 -qmax 8 -async 25 -acodec libmp3lame -ab 96k -ac 2 -vol 512 $name
 	
 	end_time=`date +%s`
 	answer=$(($end_time-$starting_time))

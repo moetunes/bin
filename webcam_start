@@ -1,0 +1,17 @@
+#!/bin/bash
+
+. ~/.shell-colors
+printf "$red have to modprobe the uvcvideo module as it is blacklisted to save battery power \n ***********************************\n$reset"
+sudo modprobe -v uvcvideo
+
+mplayer tv:// -tv driver=v4l2:width=640:height=480:device=/dev/video0 -fps 15 -vf screenshot
+
+printf "$yell You should remove the module if that's all the webcam video you want to watch\n"
+printf "$green unload webcam module? [y/n]  $cyan "
+read reply
+if [ "$reply" == "y" ]; then
+    sudo rmmod -v uvcvideo
+    printf "$white That's some battery life you added there (:\n\n$reset"
+fi
+
+exit 0

@@ -11,8 +11,8 @@ else
 	exit 1
 fi
 printf "\t$yell Recording \r"
-ffmpeg -t $capture -y -r 30 -g 300 -s 1366x768 -f x11grab -i :0.0 -vcodec mpeg4 -s 640x360 out.avi 2> /dev/null
-printf "\t$green Done Recording \r" && sleep 1
-printf "$blue Leaving\n$reset"
+ffmpeg -threads 5 -t $capture -y -r 30 -g 300 -s 1366x768 -f x11grab -i :0.0 -vcodec mpeg4 out.avi 2> /dev/null
+printf "\t$green Done Recording \a\r" && sleep 1
+printf "$blue Leaving\a\n$reset"
 
 exit 0

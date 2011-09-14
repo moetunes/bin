@@ -1,0 +1,6 @@
+#!/bin/bash
+
+result=`cat ~/.bash_history | awk '{print $1, $2, $3}'| awk 'BEGIN {FS="|"} {print $1}' | sort | uniq -c | sort -rn | head -25`
+printf "$result"
+
+exit 0
