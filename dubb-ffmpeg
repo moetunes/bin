@@ -3,9 +3,6 @@
 
 # include some colours
 . ~/.shell-colors
-# check the cpu is at full speed
-echo -e "$green\t Maxed out the CPU..."
-echo "3000000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_setspeed
 
 echo "                  ********"
 if [ -z "$1" ]; then 
@@ -168,9 +165,6 @@ rm -v ffmpeg2pass-0.log &> /dev/null
 printf "\n    ***    $name     *** \n"
 printf "\n    *** Done - Bye ! *** \n\n"
 printf '\033[0m' # return the prompt to orig
-# set the cpu speed
-# echo -e "$green \t Turned down the CPU...."
-# echo "1500000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_setspeed
 exit 0
 }
 ###************************************************
