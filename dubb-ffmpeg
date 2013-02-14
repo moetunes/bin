@@ -3,6 +3,9 @@
 
 # include some colours
 . ~/.shell-colors
+# check the cpu is at full speed
+echo -e "$green\t Maxed out the CPU..."
+echo "3000000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_setspeed
 
 echo "                  ********"
 if [ -z "$1" ]; then 
@@ -12,26 +15,23 @@ if [ -z "$1" ]; then
     exit
 fi
 printf "$green We are converting any video file to xvid cd sized avi as a default. \n"
-printf "$yell      All options are changeable \n"
+printf "$yell       All options are changeable \n"
 printf "$yell      The file info we need :- \n"
-#printf "$white    [ The important lines start with   Stream ] \n"
+printf "$white    [ The important lines start with   Stream ] \n"
 ##access the working movie title ##
 movie_name="$1"
+printf "\n $cyan      ******** \n"
 ##this gives the various video/audio settings for the input file##
-knowledge=`ffmpeg -i "$movie_name" 2>&1 | grep -E 'Duration|Stream'`
-know1=`echo $knowledge | cut -d 'S' -f1`
-know2=`echo $knowledge | cut -d '#' -f2 | cut -d 'S' -f1`
-know3=`echo $knowledge | cut -d '#' -f3 | cut -d 'S' -f1`
-printf "$cyan       ********\n"
+ffmpeg -i "$movie_name"
+echo "       ********"
 ##Defaults ##
-size="720x576"
+size="720x404"
 aspect="16:9"
-mp3rate="128"
+mp3rate="96"
 fps="25"
 start=""
 time=""
-bitrate="1100"
-saveto="/home/pnewm"
+bitrate="1000"
 
 ###****************************************************
 ##if we change a default we call the options again for more changes ##
@@ -54,7 +54,6 @@ printf " 4. Audio sync level $cyan [$fps] $yell - important to get the sound syn
 printf " 5. Start $cyan [$start] $yell - To cut the first xxx sec of the file. Blank to encode from start \n"
 printf " 6. Time $cyan [$time] $yell - Blank to record whole file - 00:00:00 format used for hour or min \n"
 printf " 7. Bitrate $cyan [$bitrate] $yell - Higher = better quality - lower = smaller file size \n"
-printf " 8. Save To $cyan [$saveto] $yell - Directory to save the file in\n"
 echo " To change a default type the corresponding number and hit enter"
 echo "  or hit enter to continue conversion"
 read input
@@ -93,23 +92,17 @@ case $input in
          read newbitrate
          bitrate=$newbitrate
          change_defaults ;;
-    8) echo " Add directory to save to"
-         read newsaveto
-         if [ -d $newsaveto ]; then
-             saveto=$newsaveto
-         else
-             printf "\n$red $newsaveto \n Directory doesn't exist\n\n"
-         fi
-         change_defaults;;
-    *) echo " $red Oops.. Must supply a correct option or just hit enter"
+    *) echo " Oops.. Must supply a correct option or just hit enter"
          change_defaults ;;
 esac
 }
 ###*******************************************************
 ##self explanitory ##
 function display_values {
-    printf "$green  $know1\n  $know2\n  $know3\n"
-    printf "\n $cyan      ********"
+    title="   Settings to be used or changed:"
+    values="   MP3Bit/R - $mp3rate , Asp/R - $aspect ,  , Res - $size , FPS - $fps, Bitrate - $bitrate"
+    printf "\n $purp $title "
+    printf " \n $red $values \n"
 }
 ###*******************************************************
 ##do the work converting the video/audio ##
@@ -120,7 +113,7 @@ printf "\n"
 setsize="-s $size"
 setaspect="-aspect $aspect"
 mp3rate=$(($mp3rate * 1000))
-setmp3rate="-b:a $mp3rate"
+setmp3rate="-ab $mp3rate"
 setfps="-async $fps"
 setbitrate=$(($bitrate*1000))
 if [ "$start" = "" ]; then
@@ -134,7 +127,7 @@ else
     settime="-t $time"
 fi
 ## Sort out the file name ##
-name=$(echo "$movie_name" | cut -d "." -f1 | tr - _ | tr " " _)
+name=$(echo "$movie_name" | sed -e 's/ //g' | tr - _)
 moving=`date +%b%d-%H%M`
 [ -f ~/$name.1.avi ] && mv -v ~/$name.1.avi ~/$moving$name.avi && \
 	printf "$cyan Lookit above ^^!! \n $reset" || \
@@ -147,9 +140,9 @@ printf "$yell *** Working on :-  $name *** "
 printf "$yell \n *** Starting pass 1 *** \n"
 printf "$green \n \n"
 
-nice -n 8 ffmpeg -i "$movie_name" -y -pass 1 -threads 4 $setstart $settime $setsize $setaspect $setfps -f avi -vcodec mpeg4 -b:v $setbitrate -dc 10 -bf 2 -g 250 -acodec copy /dev/null
+nice -n 8 ffmpeg -i "$movie_name" -y -pass 1 -threads 3 $setstart $settime $setsize $setaspect $setfps -f avi -vcodec mpeg4 -b:v $setbitrate -qmax 9 -dc 10 -bf 2 -g 250 -acodec copy /dev/null
 
-middle_time=`date +%s`
+ middle_time=`date +%s`
 answer=$(($middle_time-$starting_time))
 
 [ "$answer" -ge "61" ] && \
@@ -160,7 +153,7 @@ answer=$(($middle_time-$starting_time))
 printf "\n $yell *** Saving to :-  $name *** "
 printf "\n  *** Starting pass 2 ***\n $green \n"
 
-nice -n 8 ffmpeg -i "$movie_name" -pass 2 -threads 4 $setstart $settime $setsize $setaspect $setfps -f avi -vcodec mpeg4 -vtag XVID -b:v $setbitrate -qmax 9 -dc 10 -bf 2 -g 250 -acodec libmp3lame $setmp3rate -ac 2 -vol 512 $saveto/$name 
+nice -n 8 ffmpeg -i "$movie_name" -pass 2 -threads 3 $setstart $settime $setsize $setaspect $setfps -f avi -vcodec mpeg4 -b:v $setbitrate -qmax 9 -dc 10 -bf 2 -g 250 -acodec libmp3lame $setmp3rate -ac 2 -vol 512 $name 
 
  end_time=`date +%s`
 answer=$(($end_time-$starting_time))
@@ -171,10 +164,13 @@ answer=$(($end_time-$starting_time))
 	printf "\n $cyan $answer seconds overall... \n\n"
 
 printf "  $yell   *** Finished encoding now deleting temporary files *** \n"
-rm -v ffmpeg2pass-0.log
+rm -v ffmpeg2pass-0.log &> /dev/null
+printf "\n    ***    $name     *** \n"
 printf "\n    *** Done - Bye ! *** \n\n"
 printf '\033[0m' # return the prompt to orig
-
+# set the cpu speed
+# echo -e "$green \t Turned down the CPU...."
+# echo "1500000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_setspeed
 exit 0
 }
 ###************************************************
