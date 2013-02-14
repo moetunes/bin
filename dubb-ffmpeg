@@ -7,8 +7,7 @@
 echo "                  ********"
 if [ -z "$1" ]; then 
     printf "$green           dubb-ffmpeg - a 2-pass video encoder \n"
-    printf "$yell       *** usage: dubb-ffmpeg /path/to/movie.mpg *** \n"
-    printf "$yell             files saved in home directory \n"
+    printf "$yell       *** usage: dubb-ffmpeg movie.<ext> *** \n"
     exit
 fi
 printf "$green We are converting any video file to xvid cd sized avi as a default. \n"
@@ -124,7 +123,7 @@ else
     settime="-t $time"
 fi
 ## Sort out the file name ##
-name=$(echo "$movie_name" | sed -e 's/ //g' | tr - _)
+name=$(echo "$movie_name" | sed -e 's/ /_/g' | tr - _)
 moving=`date +%b%d-%H%M`
 [ -f ~/$name.1.avi ] && mv -v ~/$name.1.avi ~/$moving$name.avi && \
 	printf "$cyan Lookit above ^^!! \n $reset" || \
