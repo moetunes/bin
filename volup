@@ -1,4 +1,4 @@
 #!/bin/bash
-amixer -c 0 set Speaker 5%+
+amixer -c 0 set Speaker 5%+ &> /dev/null
 #amixer -c 1 set Speaker 10%+
 exit 0

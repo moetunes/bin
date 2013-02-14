@@ -1,7 +1,11 @@
 #!/bin/bash
 
-how_loud=`amixer get Speaker | grep "%" | cut -d [ -f2 | cut -d ] -f1 | uniq` 
+how_loud=`amixer get Speaker | grep "%" | cut -d [ -f2 | cut -d ] -f1 | uniq`
+the_amp=`amixer get Pre-Amp | grep "%" | cut -d [ -f2 | cut -d ] -f1 | uniq`
 
-echo $how_loud | dbar -w 60 -s '|' -min 0 -max 100 | dzen2 -p 4 -fg green -x 350 -y 384 -w 600
-
+# echo $how_loud | dbar -w 60 -s '|' -min 0 -max 100 | dzen2 -p 4 -fg green -x 350 -y 384 -w 600
+echo $how_loud | gdbar -fg '#99ccdd' -bg blue -h 7 -w 400 | dzen2 -p 4 -bg gray10 -x 420 -y 700 -w 450 &
+echo $the_amp | gdbar -fg '#99ccdd' -bg blue -h 7 -w 400 | dzen2 -p 4 -bg gray10 -x 420 -y 720 -w 450
+how_loud=""
+the_amp=""
 exit 0

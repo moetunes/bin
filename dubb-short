@@ -6,8 +6,9 @@ if [ -z "$1" ]; then
 	echo -e "\n $red   OOPS...\n    Usage: dubb-short movie_name\n $reset"
 	exit
 fi
-# printf " \t  $yell  Add time for conversion (in secs): \n \t [ or hit enter to convert the whole file ] \n \t :-  "
-# read input
+vid="$1"
+printf " \t  $yell  Add time for conversion (in secs): \n \t [ or hit enter to convert the whole file ] \n \t :-  "
+read input
 if [  "$input" = "" ]; then
 	convtime=""
 else
@@ -15,12 +16,12 @@ else
 fi
 if [ -f "$1" ]; then
 	echo -e "\n $cyan  *** Converting the movie - one pass ***\n"
-	name=$(echo  $1 | cut -d "." -f1 | tr - _)
+	name=$(echo  $1 | cut -d "." -f1 | tr - _ | tr ' ' _ | tr -s '_')
 	name=./$name.1.avi
 	echo -e "\n   ***Saving to $name***\n $green"
 	starting_time=`date +%s`
 
-	nice -n 8 ffmpeg $convtime -i $1 -y -threads 5 -s 720x400 -aspect 16:9 -f avi -vcodec mpeg4 -b 1100000 -qmax 8 -async 25 -acodec libmp3lame -ab 96k -ac 2 -vol 512 $name
+	nice -n 8 ffmpeg $convtime -i "$vid" -y -threads 3 -s 720x576 -aspect 16:9 -f avi -b:v 1100k -async 25 -acodec libmp3lame -b:a 96k -ac 2 -vol 512 $name
 	
 	end_time=`date +%s`
 	answer=$(($end_time-$starting_time))

@@ -2,21 +2,33 @@
 
 # take a snapshot of the desktop with a delay - saves ~/screenshots/snappy
 # limit 2 per minute
-# made by me 11/10/10
+# made by me 11/10/10, countdown added 3/1/12
+. ~/.shell-colors
 
+num=`cat ~/screenshots/snappy/counter`
+name=$num
 # give a delay when entering the app at cli or use the default of 5
 [ "$1" != "" ] && capture=$1 || capture=5
-sleep $capture
-# set the time and date to add to the jpegs' name
-first=$(date +%b%d-%H%M)
-name=$(echo $first | sed -e 's: ::g')
-[ -f ~/screenshots/snappy/snappy-$name.jpeg ] && name=$name.1 && echo "Already exists adding -1"
+i=0; toggle=$white
+printf "$yell\n\tScreen Capture in "
+for((i=$capture;i>0;i--)); do
+    printf "$toggle$i... "
+    sleep 1
+    [ $toggle == $cyan ] && toggle=$white || toggle=$cyan
+done
+
+[ -f ~/screenshots/snappy/snappy-$num.jpeg ] && name=$num.1 && echo "Already exists adding -1"
 
 # give a couple of beeps when the snapshot is being taken
 echo -e '\a' && sleep .25 && echo -e '\a'
 # take the snapshot
-ffmpeg -t 1 -r 1 -s 1366x768 -f x11grab -i :0.0 -r 1 -f image2 ~/screenshots/snappy/snappy-$name.jpeg &> /dev/null
-printf "::\t snappy-$name.jpeg \t DONE \n"
-sleep 1
+# ffmpeg -t 1 -r 1 -s 1366x768 -f x11grab -i :0.0 -r 1 -f image2 ~/screenshots/snappy/snappy-$name.jpeg &> /dev/null
+imlib2_grab ~/screenshots/snappy/snappy-$name.png
+printf "\n::\t snappy-$name.jpeg \t DONE \n$reset"
+sleep .7
+if [ $num -lt 1 ]; then
+     num=1000
+fi
+echo $((num-1)) > ~/screenshots/snappy/counter
 
 exit 0

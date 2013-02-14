@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# copy magnet link from firefox and
+# save to ~/torrmag
+
+[[ "$1" != "" ]] || $(xmessage -center "   LINK FAIL !!!   " && exit)
+echo "$1" > ~/torrmag && \
+ xmessage -center -timeout 4 "       Magnet Link Saved       " ||\
+  xmessage -center "   LINK WRITE FAIL !!!   "
+
+exit 0
+

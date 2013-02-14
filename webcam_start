@@ -10,7 +10,7 @@ printf "$yell You should remove the module if that's all the webcam video you wa
 printf "$green unload webcam module? [y/n]  $cyan "
 read reply
 if [ "$reply" == "y" ]; then
-    sudo rmmod -v uvcvideo
+    sudo modprobe -rv uvcvideo
     printf "$white That's some battery life you added there (:\n\n$reset"
 fi
 
