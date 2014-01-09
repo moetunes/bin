@@ -16,7 +16,7 @@ else
 fi
 if [ -f "$1" ]; then
 	echo -e "\n $cyan  *** Converting the movie - one pass ***\n"
-	name=$(echo  $1 | cut -d "." -f1 | tr - _ | tr ' ' _ | tr -s '_')
+	name=$(basename $vid | cut -d "." -f1 | tr - _ | tr ' ' _ | tr -s '_')
 	name=./$name.1.avi
 	echo -e "\n   ***Saving to $name***\n $green"
 	starting_time=`date +%s`

@@ -1,4 +1,9 @@
 #!/bin/bash
-amixer -c 0 set Speaker 5%+ &> /dev/null
+if [[ "$(grep -A12 'Speaker Phantom'  /proc/asound/card0/codec#0\
+ | grep 'Pin\-ctls' | cut -d ':' -f3)" != "" ]]; then
+    amixer -c 0 set Speaker 3%+ &> /dev/null
+else
+    amixer -c 0 set Headphone 5%+ &> /dev/null
+fi
 #amixer -c 1 set Speaker 10%+
 exit 0

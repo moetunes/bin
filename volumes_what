@@ -1,6 +1,11 @@
 #!/bin/bash
 
-how_loud=`amixer get Speaker | grep "%" | cut -d [ -f2 | cut -d ] -f1 | uniq`
+if [[ "$(grep -A12 'Speaker Phantom'  /proc/asound/card0/codec#0\
+ | grep 'Pin\-ctls' | cut -d ':' -f3)" != "" ]]; then
+    how_loud=`amixer get Speaker | grep "%" | cut -d [ -f2 | cut -d ] -f1 | uniq`the_amp=`amixer get Pre-Amp | grep "%" | cut -d [ -f2 | cut -d ] -f1 | uniq`
+else
+    how_loud=`amixer get Headphone | grep "%" | cut -d [ -f2 | cut -d ] -f1 | uniq`
+fi
 the_amp=`amixer get Pre-Amp | grep "%" | cut -d [ -f2 | cut -d ] -f1 | uniq`
 
 # echo $how_loud | dbar -w 60 -s '|' -min 0 -max 100 | dzen2 -p 4 -fg green -x 350 -y 384 -w 600

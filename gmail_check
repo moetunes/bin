@@ -1,16 +1,28 @@
 #!/bin/bash
 
 ## Quickly checks if I have new gmail
+. ~/.shell-colors
 
 outtox=0
 [[ "$1" != "" ]] && outtox=1
 tmp=/tmp/gmail_check.atomfeed
 [[ -f $tmp ]] || touch $tmp
 mssg=""
+if [ "$outtox" -lt "1" ]; then
+    A=""
+    B=""
+    C=""
+else
+    A=$green
+    B=$yell
+    C=$cyan
+fi
+
+printf "\t${blue}*** Checking Mail for <USERNAME> ***\n\n$reset"
 
 wget -T 3 -t 1 -q --secure-protocol=TLSv1 \
  --no-check-certificate \
- --user=moetunes111 --password="f0*fO?W3(((" \
+ --user=<USERNAME> --password="<PASSWORD>" \
  https://mail.google.com/mail/feed/atom -O $tmp
 
 if [ "$(wc -l $tmp | awk '{print $1}')" -lt "2" ]; then
@@ -18,7 +30,7 @@ if [ "$(wc -l $tmp | awk '{print $1}')" -lt "2" ]; then
         echo -e "   GMAIL CHECK FAILED   \n       CHECK NEEDED     \n" |\
             xmessage -center -file -
      else
-        echo -e "   GMAIL CHECK FAILED   \n       CHECK NEEDED     \n"
+        echo -e "$red   GMAIL CHECK FAILED   \n       CHECK NEEDED     $reset\n"
      fi
     exit 1
 fi 
@@ -29,17 +41,23 @@ let have_mail=(${have_mail}+$how_many)
 what_mail=`sed -n 's|<title>\(.*\)</title>|\1|p' $tmp`
 #echo "$what_mail"
 i=0
+D=$C
 
 if [ $have_mail -gt "0" ]; then
-    mssg="   You have new gmail.  \n"
+    mssg="$A   You have new gmail.  \n"
     mssg="$mssg   There are:\n      $have_mail new messages\n\n"
     while read -r line; do
         if [ "$i" -lt "1" ]; then
-            mssg="$mssg   $line\n"
+            mssg="$mssg   $D$line\n"
         else
-            mssg="$mssg      $line\n"
+            mssg="$mssg      $D$line\n"
         fi
         ((++i))
+        if [ "$D" != "$B" ]; then
+            D=$B
+        else
+            D=$C
+        fi
     done < <(echo "$what_mail")
     if [ "$outtox" -lt "1" ]; then
         echo -e "$mssg" | xmessage -center -file -
@@ -47,9 +65,11 @@ if [ $have_mail -gt "0" ]; then
          echo -e "$mssg"
      fi
 else
-    mssg="   No new gmail.  "
+    mssg="$C   No new gmail.  "
     [[ "$outtox" -lt "1" ]] && echo -e "$mssg" | xmessage -center -timeout 4 -file - ||\
      echo -e "$mssg"
 fi
+
+printf "$blue\n\t*******************$reset\n"
 
 exit 0

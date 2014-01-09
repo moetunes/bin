@@ -4,7 +4,7 @@
 printf "$red have to modprobe the uvcvideo module as it is blacklisted to save battery power \n ***********************************\n$reset"
 sudo modprobe -v uvcvideo
 
-mplayer tv:// -tv driver=v4l2:width=640:height=480:device=/dev/video0 -fps 15 -vf screenshot
+mpv tv:// -tv driver=v4l2:width=640:height=480:device=/dev/video0 -fps 15 -vf screenshot
 
 printf "$yell You should remove the module if that's all the webcam video you want to watch\n"
 printf "$green unload webcam module? [y/n]  $cyan "
