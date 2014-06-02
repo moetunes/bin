@@ -18,12 +18,14 @@ else
     C=$cyan
 fi
 
-printf "\t${blue}*** Checking Mail for <USERNAME> ***\n\n$reset"
+printf "\t${blue}*** Checking Mail for$yell MOETUNES111$blue ***\n\n$reset"
 
 wget -T 3 -t 1 -q --secure-protocol=TLSv1 \
  --no-check-certificate \
  --user=<USERNAME> --password="<PASSWORD>" \
  https://mail.google.com/mail/feed/atom -O $tmp
+
+sed -i 's:<:\n<:g' $tmp
 
 if [ "$(wc -l $tmp | awk '{print $1}')" -lt "2" ]; then
     if [ "$outtox" -lt "1" ]; then

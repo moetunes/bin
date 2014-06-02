@@ -7,13 +7,13 @@ if [ -z "$1" ]; then
 	exit
 fi
 vid="$1"
-printf " \t  $yell  Add time for conversion (in secs): \n \t [ or hit enter to convert the whole file ] \n \t :-  "
-read input
-if [  "$input" = "" ]; then
+#printf " \t  $yell  Add time for conversion (in secs): \n \t [ or hit enter to convert the whole file ] \n \t :-  "
+#read input
+#if [  "$input" = "" ]; then
 	convtime=""
-else
-	convtime="-t $input"
-fi
+#else
+#	convtime="-t $input"
+#fi
 if [ -f "$1" ]; then
 	echo -e "\n $cyan  *** Converting the movie - one pass ***\n"
 	name=$(basename $vid | cut -d "." -f1 | tr - _ | tr ' ' _ | tr -s '_')
